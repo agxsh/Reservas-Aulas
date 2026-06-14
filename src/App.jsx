@@ -1,3 +1,6 @@
+import { db } from `./firebase`
+import { collection, addDoc, getDocs } from `firebase/firestore`
+import { useEffect } from `react`
 import { useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
