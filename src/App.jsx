@@ -1,6 +1,6 @@
-import { db } from `./firebase`
-import { collection, addDoc, getDocs } from `firebase/firestore`
-import { useEffect } from `react`
+import { db } from './firebase'
+import { collection, addDoc, getDocs } from 'firebase/firestore'
+import { useEffect } from 'react'
 import { useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
@@ -23,6 +23,27 @@ function App() {
 
   const [finSeleccionado, setFinSeleccionado] = useState(null)
 
+  useEffect(() => {
+
+  const cargarReservas = async () => {
+
+    const snapshot = await getDocs(
+      collection(db, "reservas")
+    )
+
+    const reservasFirebase = snapshot.docs.map(doc => ({
+      ...doc.data(),
+      start: new Date(doc.data().start),
+      end: new Date(doc.data().end)
+    }))
+
+    setReservas(reservasFirebase)
+  }
+
+  cargarReservas()
+
+  }, [])
+
   const manejarSeleccion = (info) => {
 
     setInicioSeleccionado(info.start)
@@ -31,7 +52,7 @@ function App() {
     setMostrarModal(true)
   }
 
-  const guardarReserva = () => {
+  const guardarReserva = async () => {
 
     if (!nombre.trim()) {
       alert("Ingresá un nombre")
@@ -59,6 +80,14 @@ function App() {
       start: inicioSeleccionado,
       end: finSeleccionado
     }
+
+    await addDoc(collection(db, "reservas"),
+  {
+    title: nombre,
+    aula: aula,
+    start: inicioSeleccionado.toISOString(),
+    end: finSeleccionado.toISOString()
+  })
 
     setReservas([...reservas, nuevaReserva])
 
