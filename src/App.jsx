@@ -1,5 +1,5 @@
 import { db } from './firebase'
-import { collection, addDoc, getDocs } from 'firebase/firestore'
+import { collection, addDoc, getDocs,deleteDoc, doc } from 'firebase/firestore'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
@@ -31,12 +31,12 @@ function App() {
       collection(db, "reservas")
     )
 
-    const reservasFirebase = snapshot.docs.map(doc => ({
-      ...doc.data(),
-      start: new Date(doc.data().start),
-      end: new Date(doc.data().end)
-    }))
-
+  const reservasFirebase = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data(),
+    start: new Date(doc.data().start),
+    end: new Date(doc.data().end)
+  }))
     setReservas(reservasFirebase)
   }
 
@@ -96,25 +96,24 @@ function App() {
     setMostrarModal(false)
   }
 
-  const eliminarReserva = (info) => {
+const eliminarReserva = async (info) => {
 
-    const confirmar = window.confirm(
-      `Desea eliminar la reserva de ${info.event.title}?`
-    )
+  const confirmar = window.confirm(
+    `Desea eliminar la reserva de ${info.event.title}?`
+  )
 
-    if(!confirmar) return
+  if (!confirmar) return
 
-    const nuevaReservas = reservas.filter(
-      reserva =>
-        !(
-          reserva.start.getTime() === info.event.start.getTime() &&
-          reserva.title === info.event.title
-        )
-    )
+  await deleteDoc(
+    doc(db, "reservas", info.event.id)
+  )
 
-    setReservas(nuevaReservas)
-  }
+  const nuevasReservas = reservas.filter(
+    reserva => reserva.id !== info.event.id
+  )
 
+  setReservas(nuevasReservas)
+}
   return (
     <div style={{ padding: '20px' }}>
       <h1>Sistema de Reservas</h1>
