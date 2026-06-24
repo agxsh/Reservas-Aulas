@@ -1,5 +1,5 @@
 import { db } from './firebase'
-import { collection, addDoc, getDocs,deleteDoc, doc } from 'firebase/firestore'
+import { collection, addDoc, deleteDoc, doc, onSnapshot } from 'firebase/firestore'
 import { useEffect } from 'react'
 import { useState } from 'react'
 import FullCalendar from '@fullcalendar/react'
@@ -23,26 +23,26 @@ function App() {
 
   const [finSeleccionado, setFinSeleccionado] = useState(null)
 
-  useEffect(() => {
+useEffect(() => {
 
-  const cargarReservas = async () => {
+  const unsubscribe = onSnapshot(
+    collection(db, "reservas"),
+    (snapshot) => {
 
-    const snapshot = await getDocs(
-      collection(db, "reservas")
-    )
+      const reservasFirebase = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        start: new Date(doc.data().start),
+        end: new Date(doc.data().end)
+      }))
 
-  const reservasFirebase = snapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data(),
-    start: new Date(doc.data().start),
-    end: new Date(doc.data().end)
-  }))
-    setReservas(reservasFirebase)
-  }
+      setReservas(reservasFirebase)
+    }
+  )
 
-  cargarReservas()
+  return () => unsubscribe()
 
-  }, [])
+}, [])
 
   const manejarSeleccion = (info) => {
 
@@ -83,7 +83,7 @@ function App() {
 
     await addDoc(collection(db, "reservas"),
   {
-    title: nombre,
+    title: `${nombre} - ${aula}`,
     aula: aula,
     start: inicioSeleccionado.toISOString(),
     end: finSeleccionado.toISOString()
@@ -109,7 +109,7 @@ const eliminarReserva = async (info) => {
   )
 
   const nuevasReservas = reservas.filter(
-    reserva => reserva.id !== info.event.id
+reserva => reserva.id !== info.event.id
   )
 
   setReservas(nuevasReservas)
