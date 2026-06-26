@@ -11,6 +11,8 @@ import interactionPlugin from '@fullcalendar/interaction'
 
 function App() {
 
+  const [vista, setVista] = useState("calendario")
+
   const [reservas, setReservas] = useState([])
 
   const [mostrarModal, setMostrarModal] = useState(false)
@@ -115,9 +117,24 @@ reserva => reserva.id !== info.event.id
   setReservas(nuevasReservas)
 }
   return (
+  <>
+    <div style={{marginBottom: "20px"}}>
+      <button onClick={() => setVista("calendario")}>
+        Calendario
+      </button>
+
+      <button
+      onClick={() => setVista("aulas")}
+      style={{marginLeft: "10px" }}
+      >
+        Vista Aulas
+      </button>
+    </div>
+
     <div style={{ padding: '20px' }}>
       <h1>Sistema de Reservas</h1>
 
+    {vista === "calendario0" && (
       <FullCalendar
         plugins={[
           dayGridPlugin,
@@ -131,6 +148,46 @@ reserva => reserva.id !== info.event.id
         events={reservas}
         height="80vh"
       />
+    )}
+
+    {vista === "aulas" && (
+      <div>
+        <h2>Vista Aulas</h2>
+
+        <table
+          border="1"
+          style={{
+            width: "100%",
+            borderCollapse: "collapse"
+          }}
+        >
+          <thead>
+            <tr>
+              <th>Profesor</th>
+              <th>Aula</th>
+              <th>Inicio</th>
+              <th>Fin</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {reservas.map((reserva) => (
+              <tr key={reserva.id}>
+                <td>{reserva.title}</td>
+                <td>{reserva.aula}</td>
+                <td>
+                  {new Date(reserva.start).toLocaleString()}
+                </td>
+                <td>
+                  {new Date(reserva.end).toLocaleString()}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+
       {mostrarModal && (
     <div
     style={{
@@ -203,6 +260,7 @@ reserva => reserva.id !== info.event.id
   </div>
 )}
     </div>
+  </>
   )
 }
 
