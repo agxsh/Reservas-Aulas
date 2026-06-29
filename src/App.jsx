@@ -134,7 +134,7 @@ reserva => reserva.id !== info.event.id
     <div style={{ padding: '20px' }}>
       <h1>Sistema de Reservas</h1>
 
-    {vista === "calendario0" && (
+    {vista === "calendario" && (
       <FullCalendar
         plugins={[
           dayGridPlugin,
